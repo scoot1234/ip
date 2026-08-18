@@ -28,14 +28,11 @@ public class Duke {
             String command = scanner.nextLine();
             System.out.println(DIVIDER);
 
-            if (command.equals("bye")) {
-                System.out.println(" Bye. Hope to see you again soon!");
-                System.out.println(DIVIDER);
-                break;
-            }
-
             try {
-                handleCommand(command, tasks);
+                if (handleCommand(command, tasks)) {
+                    System.out.println(DIVIDER);
+                    break;
+                }
             } catch (DukeException exception) {
                 System.out.println(" " + exception.getMessage());
             }
@@ -48,59 +45,80 @@ public class Duke {
      *
      * @param command command entered by the user
      * @param tasks task list for the current session
+     * @return whether the chatbot should exit
      * @throws DukeException if the command or its arguments are invalid
      */
-    private static void handleCommand(String command, List<Task> tasks) throws DukeException {
-        if (command.equals("list")) {
+    private static boolean handleCommand(String command, List<Task> tasks) throws DukeException {
+        CommandType commandType = CommandType.fromInput(command);
+        switch (commandType) {
+        case BYE:
+            System.out.println(" Bye. Hope to see you again soon!");
+            return true;
+        case LIST:
             printTaskList(tasks);
-            return;
+            return false;
+        case MARK:
+            updateTaskStatus(command, CommandType.MARK, tasks, true);
+            return false;
+        case UNMARK:
+            updateTaskStatus(command, CommandType.UNMARK, tasks, false);
+            return false;
+        case DELETE:
+            deleteTask(command, tasks);
+            return false;
+        case TODO:
+            addTodo(command, tasks);
+            return false;
+        case DEADLINE:
+            addDeadline(command, tasks);
+            return false;
+        case EVENT:
+            addEvent(command, tasks);
+            return false;
+        case UNKNOWN:
+            throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
+        default:
+            throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
-        if (command.equals("mark") || command.startsWith("mark ")) {
-            int taskIndex = getTaskIndex(command, "mark", tasks.size());
+    }
+
+    /** Updates a task's completion status and displays its confirmation. */
+    private static void updateTaskStatus(String command, CommandType commandType, List<Task> tasks,
+                                         boolean isDone) throws DukeException {
+        int taskIndex = getTaskIndex(command, commandType, tasks.size());
+        if (isDone) {
             tasks.get(taskIndex).markAsDone();
             System.out.println(" Nice! I've marked this task as done:");
-            System.out.println("   " + tasks.get(taskIndex));
-            return;
-        }
-        if (command.equals("unmark") || command.startsWith("unmark ")) {
-            int taskIndex = getTaskIndex(command, "unmark", tasks.size());
+        } else {
             tasks.get(taskIndex).unmarkAsDone();
             System.out.println(" OK, I've marked this task as not done yet:");
-            System.out.println("   " + tasks.get(taskIndex));
-            return;
         }
-        if (command.equals("delete") || command.startsWith("delete ")) {
-            int taskIndex = getTaskIndex(command, "delete", tasks.size());
-            Task removedTask = tasks.remove(taskIndex);
-            System.out.println(" Noted. I've removed this task:");
-            System.out.println("   " + removedTask);
-            System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
-            return;
+        System.out.println("   " + tasks.get(taskIndex));
+    }
+
+    /** Removes the selected task and displays its confirmation. */
+    private static void deleteTask(String command, List<Task> tasks) throws DukeException {
+        int taskIndex = getTaskIndex(command, CommandType.DELETE, tasks.size());
+        Task removedTask = tasks.remove(taskIndex);
+        System.out.println(" Noted. I've removed this task:");
+        System.out.println("   " + removedTask);
+        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /** Parses a to-do command, validates its description, and adds the task. */
+    private static void addTodo(String command, List<Task> tasks) throws DukeException {
+        String description = command.substring(CommandType.TODO.getKeyword().length()).trim();
+        if (description.isEmpty()) {
+            throw new DukeException("OOPS!!! The description of a todo cannot be empty.");
         }
-        if (command.equals("todo") || command.startsWith("todo ")) {
-            String description = command.substring("todo".length()).trim();
-            if (description.isEmpty()) {
-                throw new DukeException("OOPS!!! The description of a todo cannot be empty.");
-            }
-            addTask(new Todo(description), tasks);
-            return;
-        }
-        if (command.equals("deadline") || command.startsWith("deadline ")) {
-            addDeadline(command, tasks);
-            return;
-        }
-        if (command.equals("event") || command.startsWith("event ")) {
-            addEvent(command, tasks);
-            return;
-        }
-        throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
+        addTask(new Todo(description), tasks);
     }
 
     /**
      * Parses a deadline command, validates its details, and adds the deadline.
      */
     private static void addDeadline(String command, List<Task> tasks) throws DukeException {
-        String details = command.substring("deadline".length()).trim();
+        String details = command.substring(CommandType.DEADLINE.getKeyword().length()).trim();
         if (details.isEmpty()) {
             throw new DukeException("OOPS!!! The description of a deadline cannot be empty.");
         }
@@ -123,7 +141,7 @@ public class Duke {
      * Parses an event command, validates its details, and adds the event.
      */
     private static void addEvent(String command, List<Task> tasks) throws DukeException {
-        String details = command.substring("event".length()).trim();
+        String details = command.substring(CommandType.EVENT.getKeyword().length()).trim();
         if (details.isEmpty()) {
             throw new DukeException("OOPS!!! The description of an event cannot be empty.");
         }
@@ -155,12 +173,12 @@ public class Duke {
     }
 
     /**
-     * Parses and validates a one-based task number from a mark or unmark command.
+     * Parses and validates a one-based task number from a command.
      */
-    private static int getTaskIndex(String command, String commandWord, int taskCount) throws DukeException {
-        String taskNumberText = command.substring(commandWord.length()).trim();
+    private static int getTaskIndex(String command, CommandType commandType, int taskCount) throws DukeException {
+        String taskNumberText = command.substring(commandType.getKeyword().length()).trim();
         if (taskNumberText.isEmpty()) {
-            throw new DukeException("OOPS!!! Please specify a task number to " + commandWord + ".");
+            throw new DukeException("OOPS!!! Please specify a task number to " + commandType.getKeyword() + ".");
         }
         try {
             int taskIndex = Integer.parseInt(taskNumberText) - 1;
