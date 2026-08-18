@@ -49,6 +49,31 @@ public class Duke {
                 tasks[taskIndex].unmarkAsDone();
                 System.out.println(" OK, I've marked this task as not done yet:");
                 System.out.println("   " + tasks[taskIndex]);
+            } else if (command.startsWith("todo ")) {
+                tasks[taskCount] = new Todo(command.substring(5));
+                taskCount++;
+                System.out.println(" Got it. I've added this task:");
+                System.out.println("   " + tasks[taskCount - 1]);
+                System.out.println(" Now you have " + taskCount + " tasks in the list.");
+            } else if (command.startsWith("deadline ")) {
+                String[] deadlineParts = command.substring(9).split(" /by ", 2);
+                tasks[taskCount] = new Deadline(deadlineParts[0], deadlineParts[1]);
+                taskCount++;
+                System.out.println(" Got it. I've added this task:");
+                System.out.println("   " + tasks[taskCount - 1]);
+                System.out.println(" Now you have " + taskCount + " tasks in the list.");
+            } else if (command.startsWith("event ")) {
+                String eventDetails = command.substring(6);
+                int fromIndex = eventDetails.indexOf(" /from ");
+                int toIndex = eventDetails.indexOf(" /to ");
+                String description = eventDetails.substring(0, fromIndex);
+                String from = eventDetails.substring(fromIndex + 7, toIndex);
+                String to = eventDetails.substring(toIndex + 5);
+                tasks[taskCount] = new Event(description, from, to);
+                taskCount++;
+                System.out.println(" Got it. I've added this task:");
+                System.out.println("   " + tasks[taskCount - 1]);
+                System.out.println(" Now you have " + taskCount + " tasks in the list.");
             } else {
                 tasks[taskCount] = new Task(command);
                 taskCount++;
