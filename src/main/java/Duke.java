@@ -1,10 +1,11 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
  * A chatbot that stores, displays, and updates tasks entered during the current session.
  */
 public class Duke {
-    private static final int MAX_TASKS = 100;
     private static final String DIVIDER = "____________________________________________________________";
 
     public static void main(String[] args) {
@@ -21,8 +22,7 @@ public class Duke {
         System.out.println("What can I do for you?");
         System.out.println(DIVIDER);
 
-        Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
+        List<Task> tasks = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
@@ -35,7 +35,7 @@ public class Duke {
             }
 
             try {
-                taskCount = handleCommand(command, tasks, taskCount);
+                handleCommand(command, tasks);
             } catch (DukeException exception) {
                 System.out.println(" " + exception.getMessage());
             }
@@ -44,45 +44,54 @@ public class Duke {
     }
 
     /**
-     * Executes one supported command and returns the updated number of tasks.
+     * Executes one supported command.
      *
      * @param command command entered by the user
-     * @param tasks task storage for the current session
-     * @param taskCount current number of tasks
-     * @return updated number of tasks
+     * @param tasks task list for the current session
      * @throws DukeException if the command or its arguments are invalid
      */
-    private static int handleCommand(String command, Task[] tasks, int taskCount) throws DukeException {
+    private static void handleCommand(String command, List<Task> tasks) throws DukeException {
         if (command.equals("list")) {
-            printTaskList(tasks, taskCount);
-            return taskCount;
+            printTaskList(tasks);
+            return;
         }
         if (command.equals("mark") || command.startsWith("mark ")) {
-            int taskIndex = getTaskIndex(command, "mark", taskCount);
-            tasks[taskIndex].markAsDone();
+            int taskIndex = getTaskIndex(command, "mark", tasks.size());
+            tasks.get(taskIndex).markAsDone();
             System.out.println(" Nice! I've marked this task as done:");
-            System.out.println("   " + tasks[taskIndex]);
-            return taskCount;
+            System.out.println("   " + tasks.get(taskIndex));
+            return;
         }
         if (command.equals("unmark") || command.startsWith("unmark ")) {
-            int taskIndex = getTaskIndex(command, "unmark", taskCount);
-            tasks[taskIndex].unmarkAsDone();
+            int taskIndex = getTaskIndex(command, "unmark", tasks.size());
+            tasks.get(taskIndex).unmarkAsDone();
             System.out.println(" OK, I've marked this task as not done yet:");
-            System.out.println("   " + tasks[taskIndex]);
-            return taskCount;
+            System.out.println("   " + tasks.get(taskIndex));
+            return;
+        }
+        if (command.equals("delete") || command.startsWith("delete ")) {
+            int taskIndex = getTaskIndex(command, "delete", tasks.size());
+            Task removedTask = tasks.remove(taskIndex);
+            System.out.println(" Noted. I've removed this task:");
+            System.out.println("   " + removedTask);
+            System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+            return;
         }
         if (command.equals("todo") || command.startsWith("todo ")) {
             String description = command.substring("todo".length()).trim();
             if (description.isEmpty()) {
                 throw new DukeException("OOPS!!! The description of a todo cannot be empty.");
             }
-            return addTask(new Todo(description), tasks, taskCount);
+            addTask(new Todo(description), tasks);
+            return;
         }
         if (command.equals("deadline") || command.startsWith("deadline ")) {
-            return addDeadline(command, tasks, taskCount);
+            addDeadline(command, tasks);
+            return;
         }
         if (command.equals("event") || command.startsWith("event ")) {
-            return addEvent(command, tasks, taskCount);
+            addEvent(command, tasks);
+            return;
         }
         throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
     }
@@ -90,7 +99,7 @@ public class Duke {
     /**
      * Parses a deadline command, validates its details, and adds the deadline.
      */
-    private static int addDeadline(String command, Task[] tasks, int taskCount) throws DukeException {
+    private static void addDeadline(String command, List<Task> tasks) throws DukeException {
         String details = command.substring("deadline".length()).trim();
         if (details.isEmpty()) {
             throw new DukeException("OOPS!!! The description of a deadline cannot be empty.");
@@ -107,13 +116,13 @@ public class Duke {
         if (by.isEmpty()) {
             throw new DukeException("OOPS!!! The deadline date/time cannot be empty.");
         }
-        return addTask(new Deadline(description, by), tasks, taskCount);
+        addTask(new Deadline(description, by), tasks);
     }
 
     /**
      * Parses an event command, validates its details, and adds the event.
      */
-    private static int addEvent(String command, Task[] tasks, int taskCount) throws DukeException {
+    private static void addEvent(String command, List<Task> tasks) throws DukeException {
         String details = command.substring("event".length()).trim();
         if (details.isEmpty()) {
             throw new DukeException("OOPS!!! The description of an event cannot be empty.");
@@ -132,22 +141,17 @@ public class Duke {
         if (from.isEmpty() || to.isEmpty()) {
             throw new DukeException("OOPS!!! Both event start and end date/time are required.");
         }
-        return addTask(new Event(description, from, to), tasks, taskCount);
+        addTask(new Event(description, from, to), tasks);
     }
 
     /**
      * Adds a task to the in-memory list and displays its confirmation.
      */
-    private static int addTask(Task task, Task[] tasks, int taskCount) throws DukeException {
-        if (taskCount == MAX_TASKS) {
-            throw new DukeException("OOPS!!! The task list is full.");
-        }
-        tasks[taskCount] = task;
-        int updatedTaskCount = taskCount + 1;
+    private static void addTask(Task task, List<Task> tasks) {
+        tasks.add(task);
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
-        System.out.println(" Now you have " + updatedTaskCount + " tasks in the list.");
-        return updatedTaskCount;
+        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -172,10 +176,10 @@ public class Duke {
     /**
      * Displays every task in the in-memory list.
      */
-    private static void printTaskList(Task[] tasks, int taskCount) {
+    private static void printTaskList(List<Task> tasks) {
         System.out.println(" Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println(" " + (i + 1) + "." + tasks[i]);
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + tasks.get(i));
         }
     }
 }
