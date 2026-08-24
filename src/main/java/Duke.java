@@ -2,6 +2,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -13,6 +17,7 @@ import java.util.Scanner;
 public class Duke {
     private static final String DIVIDER = "____________________________________________________________";
     private static final Path DATA_FILE = Path.of("data", "duke.txt");
+    private static final DateTimeFormatter EVENT_INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static void main(String[] args) {
         String banner = " ____  _                   \n"
@@ -87,6 +92,9 @@ public class Duke {
             return false;
         case EVENT:
             addEvent(command, tasks);
+            return false;
+        case FIND:
+            findTasks(command, tasks);
             return false;
         case UNKNOWN:
             throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
@@ -168,7 +176,11 @@ public class Duke {
         if (by.isEmpty()) {
             throw new DukeException("OOPS!!! The deadline date/time cannot be empty.");
         }
-        addTask(new Deadline(description, by), tasks);
+        try {
+            addTask(new Deadline(description, LocalDate.parse(by)), tasks);
+        } catch (DateTimeParseException exception) {
+            throw new DukeException("OOPS!!! Use a deadline date in yyyy-MM-dd format.");
+        }
     }
 
     /**
@@ -193,7 +205,12 @@ public class Duke {
         if (from.isEmpty() || to.isEmpty()) {
             throw new DukeException("OOPS!!! Both event start and end date/time are required.");
         }
-        addTask(new Event(description, from, to), tasks);
+        try {
+            addTask(new Event(description, LocalDateTime.parse(from, EVENT_INPUT_FORMAT),
+                    LocalDateTime.parse(to, EVENT_INPUT_FORMAT)), tasks);
+        } catch (DateTimeParseException exception) {
+            throw new DukeException("OOPS!!! Use event date/times in yyyy-MM-dd HH:mm format.");
+        }
     }
 
     /**
@@ -210,6 +227,33 @@ public class Duke {
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /** Finds deadlines and events that occur on the requested date. */
+    private static void findTasks(String command, List<Task> tasks) throws DukeException {
+        String dateText = command.substring(CommandType.FIND.getKeyword().length()).trim();
+        if (dateText.isEmpty()) {
+            throw new DukeException("OOPS!!! Please specify a date in yyyy-MM-dd format.");
+        }
+        LocalDate date;
+        try {
+            date = LocalDate.parse(dateText);
+        } catch (DateTimeParseException exception) {
+            throw new DukeException("OOPS!!! Use a find date in yyyy-MM-dd format.");
+        }
+        System.out.println(" Here are the tasks on " + date + ":");
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            if ((task instanceof Deadline && ((Deadline) task).getBy().equals(date))
+                    || (task instanceof Event && occursOn((Event) task, date))) {
+                System.out.println(" " + (i + 1) + "." + task);
+            }
+        }
+    }
+
+    /** Returns whether an event's inclusive date range contains a given date. */
+    private static boolean occursOn(Event event, LocalDate date) {
+        return !date.isBefore(event.getFrom().toLocalDate()) && !date.isAfter(event.getTo().toLocalDate());
     }
 
     /**
@@ -230,7 +274,7 @@ public class Duke {
                 }
             }
             return tasks;
-        } catch (IOException | SecurityException exception) {
+        } catch (IOException | SecurityException | DateTimeParseException exception) {
             throw new DukeException("OOPS!!! I could not load your tasks.");
         }
     }
@@ -288,10 +332,11 @@ public class Duke {
         int detailStartIndex = taskParts[0].equals("V2") ? 4 : 3;
         switch (type) {
         case "D":
-            task = new Deadline(description, taskParts[detailStartIndex]);
+            task = new Deadline(description, LocalDate.parse(taskParts[detailStartIndex]));
             break;
         case "E":
-            task = new Event(description, taskParts[detailStartIndex], taskParts[detailStartIndex + 1]);
+            task = new Event(description, LocalDateTime.parse(taskParts[detailStartIndex]),
+                    LocalDateTime.parse(taskParts[detailStartIndex + 1]));
             break;
         case "T":
         default:
@@ -346,12 +391,12 @@ public class Duke {
         if (task instanceof Deadline) {
             Deadline deadline = (Deadline) task;
             return "V2 | D | " + doneStatus + " | " + encodeText(task.getDescription())
-                    + " | " + encodeText(deadline.getBy());
+                    + " | " + encodeText(deadline.getBy().toString());
         }
         if (task instanceof Event) {
             Event event = (Event) task;
             return "V2 | E | " + doneStatus + " | " + encodeText(task.getDescription())
-                    + " | " + encodeText(event.getFrom()) + " | " + encodeText(event.getTo());
+                    + " | " + encodeText(event.getFrom().toString()) + " | " + encodeText(event.getTo().toString());
         }
         return "V2 | T | " + doneStatus + " | " + encodeText(task.getDescription());
     }
