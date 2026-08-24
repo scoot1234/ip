@@ -1,3 +1,8 @@
+package bloop.ui;
+
+import bloop.exception.DukeException;
+import bloop.task.Task;
+import bloop.task.TaskList;
 import java.time.LocalDate;
 
 /** Handles all console output formatting for Bloop. */

@@ -1,3 +1,5 @@
+package bloop.parser;
+
 /**
  * Represents the supported commands and their input keywords.
  */
