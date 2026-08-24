@@ -21,10 +21,12 @@ import java.util.List;
 public class Storage {
     private final Path dataFile;
 
+    /** Creates storage backed by the supplied task-data file. */
     public Storage(Path dataFile) {
         this.dataFile = dataFile;
     }
 
+    /** Loads every saved task, returning an empty list when no file exists. */
     public List<Task> load() throws DukeException {
         List<Task> tasks = new ArrayList<>();
         if (!Files.exists(dataFile)) {
@@ -42,6 +44,7 @@ public class Storage {
         }
     }
 
+    /** Writes the complete task list to disk. */
     public void save(TaskList tasks) throws DukeException {
         List<String> taskLines = new ArrayList<>();
         for (Task task : tasks.asList()) {
@@ -55,6 +58,7 @@ public class Storage {
         }
     }
 
+    /** Restores a task from either a legacy or version-two storage record. */
     private Task deserializeTask(String taskLine) throws DukeException {
         if (taskLine.startsWith("V2 | ")) {
             return deserializeVersionTwoTask(taskLine);
@@ -64,6 +68,7 @@ public class Storage {
         return createTask(taskParts[0], taskParts[1], taskParts[2], taskParts);
     }
 
+    /** Restores a version-two record whose text fields are Base64 encoded. */
     private Task deserializeVersionTwoTask(String taskLine) throws DukeException {
         String[] taskParts = taskLine.split(" \\| ", -1);
         validateTaskParts(taskParts, true);
@@ -74,6 +79,7 @@ public class Storage {
         return createTask(decodedParts[1], decodedParts[2], decodedParts[3], decodedParts);
     }
 
+    /** Validates the type, status, and field count of a stored task record. */
     private void validateTaskParts(String[] taskParts, boolean isVersionTwo) throws DukeException {
         int typeIndex = isVersionTwo ? 1 : 0;
         int statusIndex = isVersionTwo ? 2 : 1;
@@ -92,6 +98,7 @@ public class Storage {
         }
     }
 
+    /** Creates the appropriate task subtype from validated storage fields. */
     private Task createTask(String type, String doneStatus, String description, String[] taskParts) {
         int detailStartIndex = taskParts[0].equals("V2") ? 4 : 3;
         Task task;
@@ -114,6 +121,7 @@ public class Storage {
         return task;
     }
 
+    /** Converts a task to a version-two storage record. */
     private String serializeTask(Task task) {
         String doneStatus = task.isDone() ? "1" : "0";
         if (task instanceof Deadline) {
@@ -129,10 +137,12 @@ public class Storage {
         return "V2 | T | " + doneStatus + " | " + encodeText(task.getDescription());
     }
 
+    /** Encodes text so storage separators can safely appear in task details. */
     private String encodeText(String text) {
         return Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** Decodes a Base64 text field, reporting corrupt records as user-facing errors. */
     private String decodeText(String text) throws DukeException {
         try {
             return new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);

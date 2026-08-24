@@ -61,6 +61,7 @@ public class Task {
         return false;
     }
 
+    /** Returns a display representation containing status and description. */
     @Override
     public String toString() {
         return "[" + getStatusIcon() + "] " + description;
