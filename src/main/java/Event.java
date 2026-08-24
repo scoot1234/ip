@@ -41,6 +41,11 @@ public class Event extends Task {
     }
 
     @Override
+    public boolean occursOn(java.time.LocalDate date) {
+        return !date.isBefore(from.toLocalDate()) && !date.isAfter(to.toLocalDate());
+    }
+
+    @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + from.format(DISPLAY_DATE_TIME_FORMAT)
                 + " to: " + to.format(DISPLAY_DATE_TIME_FORMAT) + ")";

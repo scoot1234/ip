@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Represents a task and whether it has been completed.
  */
@@ -50,6 +52,11 @@ public class Task {
     /** Marks this task as incomplete. */
     public void unmarkAsDone() {
         isDone = false;
+    }
+
+    /** Returns whether this task occurs on the supplied date. */
+    public boolean occursOn(LocalDate date) {
+        return false;
     }
 
     @Override
