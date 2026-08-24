@@ -54,13 +54,14 @@ public class Parser {
         if (details.isEmpty()) {
             throw new DukeException("OOPS!!! The description of an event cannot be empty.");
         }
-        int fromIndex = details.indexOf(" /from ");
+        int fromIndex = details.startsWith("/from ") ? 0 : details.indexOf(" /from ");
         int toIndex = details.indexOf(" /to ");
         if (fromIndex == -1 || toIndex == -1 || toIndex < fromIndex) {
             throw new DukeException("OOPS!!! Use event <description> /from <start> /to <end>.");
         }
         String description = details.substring(0, fromIndex).trim();
-        String from = details.substring(fromIndex + " /from ".length(), toIndex).trim();
+        int fromValueStart = fromIndex == 0 ? "/from ".length() : fromIndex + " /from ".length();
+        String from = details.substring(fromValueStart, toIndex).trim();
         String to = details.substring(toIndex + " /to ".length()).trim();
         if (description.isEmpty()) {
             throw new DukeException("OOPS!!! The description of an event cannot be empty.");
