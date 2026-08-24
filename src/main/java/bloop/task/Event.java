@@ -1,0 +1,55 @@
+package bloop.task;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Represents a task that occurs over a specified time period.
+ */
+public class Event extends Task {
+    private static final DateTimeFormatter DISPLAY_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("MMM dd uuuu HH:mm");
+    protected LocalDateTime from;
+    protected LocalDateTime to;
+
+    /**
+     * Creates an event with a description, start time, and end time.
+     *
+     * @param description description of the event
+     * @param from start date or time
+     * @param to end date or time
+     */
+    public Event(String description, LocalDateTime from, LocalDateTime to) {
+        super(description);
+        this.from = from;
+        this.to = to;
+    }
+
+    /**
+     * Returns the event's start date or time.
+     *
+     * @return start date or time
+     */
+    public LocalDateTime getFrom() {
+        return from;
+    }
+
+    /**
+     * Returns the event's end date or time.
+     *
+     * @return end date or time
+     */
+    public LocalDateTime getTo() {
+        return to;
+    }
+
+    @Override
+    public boolean occursOn(java.time.LocalDate date) {
+        return !date.isBefore(from.toLocalDate()) && !date.isAfter(to.toLocalDate());
+    }
+
+    @Override
+    public String toString() {
+        return "[E]" + super.toString() + " (from: " + from.format(DISPLAY_DATE_TIME_FORMAT)
+                + " to: " + to.format(DISPLAY_DATE_TIME_FORMAT) + ")";
+    }
+}

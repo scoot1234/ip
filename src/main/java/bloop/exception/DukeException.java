@@ -1,3 +1,5 @@
+package bloop.exception;
+
 /**
  * Represents an error caused by invalid input to the Duke chatbot.
  */

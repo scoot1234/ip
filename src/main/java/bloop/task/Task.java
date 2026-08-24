@@ -1,3 +1,7 @@
+package bloop.task;
+
+import java.time.LocalDate;
+
 /**
  * Represents a task and whether it has been completed.
  */
@@ -24,6 +28,24 @@ public class Task {
         return isDone ? "X" : " ";
     }
 
+    /**
+     * Returns the task description for storage or display.
+     *
+     * @return task description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Returns whether this task has been completed.
+     *
+     * @return whether the task is done
+     */
+    public boolean isDone() {
+        return isDone;
+    }
+
     /** Marks this task as complete. */
     public void markAsDone() {
         isDone = true;
@@ -32,6 +54,11 @@ public class Task {
     /** Marks this task as incomplete. */
     public void unmarkAsDone() {
         isDone = false;
+    }
+
+    /** Returns whether this task occurs on the supplied date. */
+    public boolean occursOn(LocalDate date) {
+        return false;
     }
 
     @Override

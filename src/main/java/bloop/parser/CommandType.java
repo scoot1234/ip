@@ -1,3 +1,5 @@
+package bloop.parser;
+
 /**
  * Represents the supported commands and their input keywords.
  */
@@ -9,6 +11,7 @@ public enum CommandType {
     MARK("mark"),
     UNMARK("unmark"),
     DELETE("delete"),
+    FIND("find"),
     BYE("bye"),
     UNKNOWN("");
 

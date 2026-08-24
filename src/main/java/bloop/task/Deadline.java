@@ -1,0 +1,42 @@
+package bloop.task;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Represents a task that must be completed by a specified time.
+ */
+public class Deadline extends Task {
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("MMM dd uuuu");
+    protected LocalDate by;
+
+    /**
+     * Creates a deadline with a description and due time.
+     *
+     * @param description description of the task
+     * @param by due date
+     */
+    public Deadline(String description, LocalDate by) {
+        super(description);
+        this.by = by;
+    }
+
+    /**
+     * Returns the deadline's due date.
+     *
+     * @return due date
+     */
+    public LocalDate getBy() {
+        return by;
+    }
+
+    @Override
+    public boolean occursOn(LocalDate date) {
+        return by.equals(date);
+    }
+
+    @Override
+    public String toString() {
+        return "[D]" + super.toString() + " (by: " + by.format(DISPLAY_DATE_FORMAT) + ")";
+    }
+}
