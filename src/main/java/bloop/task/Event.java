@@ -1,5 +1,6 @@
 package bloop.task;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -43,7 +44,7 @@ public class Event extends Task {
     }
 
     @Override
-    public boolean occursOn(java.time.LocalDate date) {
+    public boolean occursOn(LocalDate date) {
         return !date.isBefore(from.toLocalDate()) && !date.isAfter(to.toLocalDate());
     }
 
