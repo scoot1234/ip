@@ -3,7 +3,6 @@ package bloop.ui;
 import bloop.exception.DukeException;
 import bloop.task.Task;
 import bloop.task.TaskList;
-import java.time.LocalDate;
 
 /** Handles all console output formatting for Bloop. */
 public class Ui {
@@ -60,10 +59,11 @@ public class Ui {
         }
     }
 
-    public void showFoundTasks(TaskList tasks, LocalDate date) {
-        System.out.println(" Here are the tasks on " + date + ":");
+    /** Displays tasks whose descriptions contain a supplied keyword. */
+    public void showFoundTasks(TaskList tasks, String keyword) {
+        System.out.println(" Here are the matching tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).occursOn(date)) {
+            if (tasks.get(i).containsKeyword(keyword)) {
                 System.out.println(" " + (i + 1) + "." + tasks.get(i));
             }
         }

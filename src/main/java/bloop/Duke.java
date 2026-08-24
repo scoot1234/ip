@@ -84,7 +84,7 @@ public class Duke {
             addTask(Parser.parseEvent(input));
             return false;
         case FIND:
-            ui.showFoundTasks(tasks, Parser.parseFindDate(input));
+            ui.showFoundTasks(tasks, Parser.parseFindKeyword(input));
             return false;
         case UNKNOWN:
         default:

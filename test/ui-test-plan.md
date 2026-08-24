@@ -14,7 +14,7 @@ deadline return book /by 2026-01-18
 event project meeting /from 2026-01-18 14:00 /to 2026-01-18 16:00
 mark 1
 list
-find 2026-01-18
+find book
 bye
 ```
 
@@ -57,9 +57,9 @@ ____________________________________________________________
  3.[E][ ] project meeting (from: Jan 18 2026 14:00 to: Jan 18 2026 16:00)
 ____________________________________________________________
 ____________________________________________________________
- Here are the tasks on 2026-01-18:
+ Here are the matching tasks in your list:
+ 1.[T][X] borrow book
  2.[D][ ] return book (by: Jan 18 2026)
- 3.[E][ ] project meeting (from: Jan 18 2026 14:00 to: Jan 18 2026 16:00)
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!

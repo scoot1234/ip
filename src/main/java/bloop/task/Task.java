@@ -61,6 +61,11 @@ public class Task {
         return false;
     }
 
+    /** Returns whether this task description contains the supplied keyword. */
+    public boolean containsKeyword(String keyword) {
+        return description.contains(keyword);
+    }
+
     @Override
     public String toString() {
         return "[" + getStatusIcon() + "] " + description;
