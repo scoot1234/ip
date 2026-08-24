@@ -24,6 +24,24 @@ public class Task {
         return isDone ? "X" : " ";
     }
 
+    /**
+     * Returns the task description for storage or display.
+     *
+     * @return task description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Returns whether this task has been completed.
+     *
+     * @return whether the task is done
+     */
+    public boolean isDone() {
+        return isDone;
+    }
+
     /** Marks this task as complete. */
     public void markAsDone() {
         isDone = true;
