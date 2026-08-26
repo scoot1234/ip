@@ -13,6 +13,7 @@ public class Todo extends Task {
         super(description);
     }
 
+    /** Returns a display representation prefixed with the to-do type icon. */
     @Override
     public String toString() {
         return "[T]" + super.toString();
