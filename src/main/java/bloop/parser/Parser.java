@@ -80,17 +80,13 @@ public class Parser {
         }
     }
 
-    /** Returns the date supplied to a find command. */
-    public static LocalDate parseFindDate(String input) throws DukeException {
-        String dateText = detailsAfter(input, CommandType.FIND);
-        if (dateText.isEmpty()) {
-            throw new DukeException("OOPS!!! Please specify a date in yyyy-MM-dd format.");
+    /** Returns the keyword supplied to a find command. */
+    public static String parseFindKeyword(String input) throws DukeException {
+        String keyword = detailsAfter(input, CommandType.FIND);
+        if (keyword.isEmpty()) {
+            throw new DukeException("OOPS!!! Please specify a keyword to find.");
         }
-        try {
-            return LocalDate.parse(dateText);
-        } catch (DateTimeParseException exception) {
-            throw new DukeException("OOPS!!! Use a find date in yyyy-MM-dd format.");
-        }
+        return keyword;
     }
 
     /** Returns the zero-based task index parsed from the user input. */
