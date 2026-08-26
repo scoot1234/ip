@@ -30,11 +30,13 @@ public class Deadline extends Task {
         return by;
     }
 
+    /** Returns whether this deadline is due on the supplied date. */
     @Override
     public boolean occursOn(LocalDate date) {
         return by.equals(date);
     }
 
+    /** Returns a display representation containing the formatted due date. */
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by.format(DISPLAY_DATE_FORMAT) + ")";

@@ -139,6 +139,7 @@ public class Duke {
         ui.showTaskAdded(task, tasks.size());
     }
 
+    /** Starts the chatbot with its default storage location. */
     public static void main(String[] args) {
         new Duke("data/duke.txt").run();
     }

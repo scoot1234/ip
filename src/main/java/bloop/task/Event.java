@@ -42,11 +42,13 @@ public class Event extends Task {
         return to;
     }
 
+    /** Returns whether the supplied date falls within this event's inclusive date range. */
     @Override
     public boolean occursOn(java.time.LocalDate date) {
         return !date.isBefore(from.toLocalDate()) && !date.isAfter(to.toLocalDate());
     }
 
+    /** Returns a display representation containing the formatted start and end times. */
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + from.format(DISPLAY_DATE_TIME_FORMAT)
