@@ -13,12 +13,12 @@ import java.time.format.DateTimeParseException;
 public class Parser {
     private static final DateTimeFormatter EVENT_INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    /** Identifies the command type represented by user input. */
+    /** Returns the command type represented by the user input. */
     public static CommandType parseCommandType(String input) {
         return CommandType.fromInput(input);
     }
 
-    /** Parses a to-do command into a task. */
+    /** Returns a to-do task parsed from the user input. */
     public static Todo parseTodo(String input) throws DukeException {
         String description = detailsAfter(input, CommandType.TODO);
         if (description.isEmpty()) {
@@ -27,7 +27,7 @@ public class Parser {
         return new Todo(description);
     }
 
-    /** Parses a deadline command into a task with an ISO-8601 due date. */
+    /** Returns a deadline task parsed from the user input. */
     public static Deadline parseDeadline(String input) throws DukeException {
         String details = detailsAfter(input, CommandType.DEADLINE);
         if (details.isEmpty()) {
@@ -52,7 +52,7 @@ public class Parser {
         }
     }
 
-    /** Parses an event command into a task with ISO-8601 start and end times. */
+    /** Returns an event task parsed from the user input. */
     public static Event parseEvent(String input) throws DukeException {
         String details = detailsAfter(input, CommandType.EVENT);
         if (details.isEmpty()) {
@@ -80,7 +80,7 @@ public class Parser {
         }
     }
 
-    /** Parses the ISO-8601 date supplied to a find command. */
+    /** Returns the date supplied to a find command. */
     public static LocalDate parseFindDate(String input) throws DukeException {
         String dateText = detailsAfter(input, CommandType.FIND);
         if (dateText.isEmpty()) {
@@ -93,7 +93,7 @@ public class Parser {
         }
     }
 
-    /** Parses a one-based task number and returns its zero-based list index. */
+    /** Returns the zero-based task index parsed from the user input. */
     public static int parseTaskIndex(String input, CommandType commandType, int taskCount) throws DukeException {
         String taskNumberText = detailsAfter(input, commandType);
         if (taskNumberText.isEmpty()) {
@@ -110,7 +110,7 @@ public class Parser {
         }
     }
 
-    /** Extracts and trims the text following a command keyword. */
+    /** Returns the trimmed text after a command keyword. */
     private static String detailsAfter(String input, CommandType commandType) {
         return input.substring(commandType.getKeyword().length()).trim();
     }

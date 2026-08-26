@@ -15,7 +15,7 @@ public class Ui {
             + "|____/|_|\\___/ \\___/| .__/ \n"
             + "                    |_|    ";
 
-    /** Displays the startup greeting. */
+    /** Displays the chatbot greeting. */
     public void showWelcome() {
         showDivider();
         System.out.println(BANNER);
@@ -29,7 +29,7 @@ public class Ui {
         System.out.println(DIVIDER);
     }
 
-    /** Displays a user-facing error. */
+    /** Displays a user-facing exception message. */
     public void showError(DukeException exception) {
         System.out.println(" " + exception.getMessage());
     }
@@ -60,7 +60,7 @@ public class Ui {
         System.out.println("   " + task);
     }
 
-    /** Displays every task with its one-based position. */
+    /** Displays every task in the list. */
     public void showTaskList(TaskList tasks) {
         System.out.println(" Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
@@ -68,7 +68,7 @@ public class Ui {
         }
     }
 
-    /** Displays tasks whose dates include the supplied date. */
+    /** Displays tasks that occur on a supplied date. */
     public void showFoundTasks(TaskList tasks, LocalDate date) {
         System.out.println(" Here are the tasks on " + date + ":");
         for (int i = 0; i < tasks.size(); i++) {

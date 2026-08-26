@@ -17,12 +17,12 @@ public class TaskList {
         this.tasks = new ArrayList<>(tasks);
     }
 
-    /** Appends a task to the list. */
+    /** Adds a task to the end of the list. */
     public void add(Task task) {
         tasks.add(task);
     }
 
-    /** Inserts a task at a zero-based index. */
+    /** Adds a task at a zero-based index. */
     public void add(int index, Task task) {
         tasks.add(index, task);
     }
@@ -42,7 +42,7 @@ public class TaskList {
         return tasks.remove(tasks.size() - 1);
     }
 
-    /** Returns the current number of tasks. */
+    /** Returns the number of tasks. */
     public int size() {
         return tasks.size();
     }
