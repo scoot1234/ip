@@ -13,10 +13,12 @@ import java.time.format.DateTimeParseException;
 public class Parser {
     private static final DateTimeFormatter EVENT_INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
+    /** Returns the command type represented by the user input. */
     public static CommandType parseCommandType(String input) {
         return CommandType.fromInput(input);
     }
 
+    /** Returns a to-do task parsed from the user input. */
     public static Todo parseTodo(String input) throws DukeException {
         String description = detailsAfter(input, CommandType.TODO);
         if (description.isEmpty()) {
@@ -25,6 +27,7 @@ public class Parser {
         return new Todo(description);
     }
 
+    /** Returns a deadline task parsed from the user input. */
     public static Deadline parseDeadline(String input) throws DukeException {
         String details = detailsAfter(input, CommandType.DEADLINE);
         if (details.isEmpty()) {
@@ -49,6 +52,7 @@ public class Parser {
         }
     }
 
+    /** Returns an event task parsed from the user input. */
     public static Event parseEvent(String input) throws DukeException {
         String details = detailsAfter(input, CommandType.EVENT);
         if (details.isEmpty()) {
@@ -85,6 +89,7 @@ public class Parser {
         return keyword;
     }
 
+    /** Returns the zero-based task index parsed from the user input. */
     public static int parseTaskIndex(String input, CommandType commandType, int taskCount) throws DukeException {
         String taskNumberText = detailsAfter(input, commandType);
         if (taskNumberText.isEmpty()) {
@@ -101,6 +106,7 @@ public class Parser {
         }
     }
 
+    /** Returns the trimmed text after a command keyword. */
     private static String detailsAfter(String input, CommandType commandType) {
         return input.substring(commandType.getKeyword().length()).trim();
     }
