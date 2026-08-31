@@ -36,7 +36,7 @@ public class Ui {
             System.out.println("What can I do for you?");
             showDivider();
         } else {
-            showMessage("Hello! I'm Bloop.\nWhat can I do for you?");
+            showMessage("Hello! I'm Bloop.", "What can I do for you?");
         }
     }
 
@@ -59,20 +59,20 @@ public class Ui {
 
     /** Displays confirmation that a task was added. */
     public void showTaskAdded(Task task, int taskCount) {
-        showMessage("Got it. I've added this task:\n  " + task
-                + "\nNow you have " + taskCount + " tasks in the list.");
+        showMessage("Got it. I've added this task:", "  " + task,
+                "Now you have " + taskCount + " tasks in the list.");
     }
 
     /** Displays confirmation that a task was deleted. */
     public void showTaskDeleted(Task task, int taskCount) {
-        showMessage("Noted. I've removed this task:\n  " + task
-                + "\nNow you have " + taskCount + " tasks in the list.");
+        showMessage("Noted. I've removed this task:", "  " + task,
+                "Now you have " + taskCount + " tasks in the list.");
     }
 
     /** Displays confirmation that a task's completion status changed. */
     public void showStatusUpdated(Task task, boolean isDone) {
-        showMessage((isDone ? "Nice! I've marked this task as done:"
-                : "OK, I've marked this task as not done yet:") + "\n  " + task);
+        showMessage(isDone ? "Nice! I've marked this task as done:"
+                : "OK, I've marked this task as not done yet:", "  " + task);
     }
 
     /** Displays every task in the list. */
@@ -95,7 +95,9 @@ public class Ui {
         showMessage(message.toString());
     }
 
-    private void showMessage(String message) {
+    /** Displays one or more lines as a single chatbot message. */
+    private void showMessage(String... lines) {
+        String message = String.join("\n", lines);
         if (messageConsumer == null) {
             System.out.println(" " + message);
         } else {
