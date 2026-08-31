@@ -20,7 +20,12 @@ public class Duke {
 
     /** Creates Bloop and restores its saved task list when possible. */
     public Duke(String filePath) {
-        ui = new Ui();
+        this(filePath, new Ui());
+    }
+
+    /** Creates Bloop with the supplied interface and restores saved tasks. */
+    public Duke(String filePath, Ui ui) {
+        this.ui = ui;
         storage = new Storage(Path.of(filePath));
         TaskList loadedTasks;
         try {
@@ -34,26 +39,45 @@ public class Duke {
 
     /** Runs Bloop's command loop. */
     public void run() {
-        ui.showWelcome();
-        if (loadingError != null) {
-            ui.showError(loadingError);
-            ui.showDivider();
+        if (!startConversation()) {
             return;
         }
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 ui.showDivider();
-                try {
-                    if (handleCommand(scanner.nextLine())) {
-                        ui.showDivider();
-                        return;
-                    }
-                } catch (DukeException exception) {
-                    ui.showError(exception);
+                if (processCommand(scanner.nextLine())) {
+                    ui.showDivider();
+                    return;
                 }
                 ui.showDivider();
             }
         }
+    }
+
+    /** Shows the greeting and reports whether commands can be processed. */
+    public boolean startConversation() {
+        ui.showWelcome();
+        if (loadingError != null) {
+            ui.showError(loadingError);
+            ui.showDivider();
+            return false;
+        }
+        return true;
+    }
+
+    /** Processes one command and returns whether the application should exit. */
+    public boolean processCommand(String input) {
+        try {
+            return handleCommand(input);
+        } catch (DukeException exception) {
+            ui.showError(exception);
+            return false;
+        }
+    }
+
+    /** Returns the tasks for display by another user interface. */
+    public TaskList getTasks() {
+        return tasks;
     }
 
     /** Executes one user command. */
@@ -85,7 +109,7 @@ public class Duke {
                 addTask(Parser.parseEvent(input));
                 return false;
             case FIND:
-                ui.showFoundTasks(tasks, Parser.parseFindDate(input));
+                ui.showFoundTasks(tasks, Parser.parseFindKeyword(input));
                 return false;
             case UNKNOWN:
             default:
