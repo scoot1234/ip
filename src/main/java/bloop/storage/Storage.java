@@ -1,11 +1,5 @@
 package bloop.storage;
 
-import bloop.exception.DukeException;
-import bloop.task.Deadline;
-import bloop.task.Event;
-import bloop.task.Task;
-import bloop.task.TaskList;
-import bloop.task.Todo;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,6 +10,13 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+
+import bloop.exception.DukeException;
+import bloop.task.Deadline;
+import bloop.task.Event;
+import bloop.task.Task;
+import bloop.task.TaskList;
+import bloop.task.Todo;
 
 /** Loads and saves task data in the application's line-based storage file. */
 public class Storage {
@@ -103,17 +104,17 @@ public class Storage {
         int detailStartIndex = taskParts[0].equals("V2") ? 4 : 3;
         Task task;
         switch (type) {
-        case "D":
-            task = new Deadline(description, LocalDate.parse(taskParts[detailStartIndex]));
-            break;
-        case "E":
-            task = new Event(description, LocalDateTime.parse(taskParts[detailStartIndex]),
-                    LocalDateTime.parse(taskParts[detailStartIndex + 1]));
-            break;
-        case "T":
-        default:
-            task = new Todo(description);
-            break;
+            case "D":
+                task = new Deadline(description, LocalDate.parse(taskParts[detailStartIndex]));
+                break;
+            case "E":
+                task = new Event(description, LocalDateTime.parse(taskParts[detailStartIndex]),
+                        LocalDateTime.parse(taskParts[detailStartIndex + 1]));
+                break;
+            case "T":
+            default:
+                task = new Todo(description);
+                break;
         }
         if (doneStatus.equals("1")) {
             task.markAsDone();

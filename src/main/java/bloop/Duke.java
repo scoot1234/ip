@@ -1,5 +1,8 @@
 package bloop;
 
+import java.nio.file.Path;
+import java.util.Scanner;
+
 import bloop.exception.DukeException;
 import bloop.parser.CommandType;
 import bloop.parser.Parser;
@@ -7,8 +10,6 @@ import bloop.storage.Storage;
 import bloop.task.Task;
 import bloop.task.TaskList;
 import bloop.ui.Ui;
-import java.nio.file.Path;
-import java.util.Scanner;
 
 /** Coordinates command handling, task storage, and user interaction for Bloop. */
 public class Duke {
@@ -59,36 +60,36 @@ public class Duke {
     private boolean handleCommand(String input) throws DukeException {
         CommandType commandType = Parser.parseCommandType(input);
         switch (commandType) {
-        case BYE:
-            ui.showGoodbye();
-            return true;
-        case LIST:
-            ui.showTaskList(tasks);
-            return false;
-        case MARK:
-            updateTaskStatus(input, commandType, true);
-            return false;
-        case UNMARK:
-            updateTaskStatus(input, commandType, false);
-            return false;
-        case DELETE:
-            deleteTask(input);
-            return false;
-        case TODO:
-            addTask(Parser.parseTodo(input));
-            return false;
-        case DEADLINE:
-            addTask(Parser.parseDeadline(input));
-            return false;
-        case EVENT:
-            addTask(Parser.parseEvent(input));
-            return false;
-        case FIND:
-            ui.showFoundTasks(tasks, Parser.parseFindKeyword(input));
-            return false;
-        case UNKNOWN:
-        default:
-            throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
+            case BYE:
+                ui.showGoodbye();
+                return true;
+            case LIST:
+                ui.showTaskList(tasks);
+                return false;
+            case MARK:
+                updateTaskStatus(input, commandType, true);
+                return false;
+            case UNMARK:
+                updateTaskStatus(input, commandType, false);
+                return false;
+            case DELETE:
+                deleteTask(input);
+                return false;
+            case TODO:
+                addTask(Parser.parseTodo(input));
+                return false;
+            case DEADLINE:
+                addTask(Parser.parseDeadline(input));
+                return false;
+            case EVENT:
+                addTask(Parser.parseEvent(input));
+                return false;
+            case FIND:
+                ui.showFoundTasks(tasks, Parser.parseFindDate(input));
+                return false;
+            case UNKNOWN:
+            default:
+                throw new DukeException("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
     }
 
