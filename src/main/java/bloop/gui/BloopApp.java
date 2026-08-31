@@ -4,6 +4,7 @@ import bloop.Duke;
 import bloop.task.Task;
 import bloop.ui.Ui;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -90,7 +91,7 @@ public class BloopApp extends Application {
         boolean shouldExit = duke.processCommand(command);
         refreshTaskList();
         if (shouldExit) {
-            commandField.setDisable(true);
+            Platform.exit();
         }
     }
 
