@@ -1,5 +1,7 @@
 package bloop.ui;
 
+import java.util.function.Consumer;
+
 import bloop.exception.DukeException;
 import bloop.task.Task;
 import bloop.task.TaskList;
@@ -13,67 +15,91 @@ public class Ui {
             + "| |_) | | (_) | (_) | |_) |\n"
             + "|____/|_|\\___/ \\___/| .__/ \n"
             + "                    |_|    ";
+    private final Consumer<String> messageConsumer;
+
+    /** Creates a console user interface. */
+    public Ui() {
+        this(null);
+    }
+
+    /** Creates a user interface that sends messages to the supplied consumer. */
+    public Ui(Consumer<String> messageConsumer) {
+        this.messageConsumer = messageConsumer;
+    }
 
     /** Displays the chatbot greeting. */
     public void showWelcome() {
-        showDivider();
-        System.out.println(BANNER);
-        System.out.println("Hello! I'm Bloop.");
-        System.out.println("What can I do for you?");
-        showDivider();
+        if (messageConsumer == null) {
+            showDivider();
+            System.out.println(BANNER);
+            System.out.println("Hello! I'm Bloop.");
+            System.out.println("What can I do for you?");
+            showDivider();
+        } else {
+            showMessage("Hello! I'm Bloop.\nWhat can I do for you?");
+        }
     }
 
     /** Displays a divider between conversation turns. */
     public void showDivider() {
-        System.out.println(DIVIDER);
+        if (messageConsumer == null) {
+            System.out.println(DIVIDER);
+        }
     }
 
     /** Displays a user-facing exception message. */
     public void showError(DukeException exception) {
-        System.out.println(" " + exception.getMessage());
+        showMessage(exception.getMessage());
     }
 
     /** Displays the farewell message. */
     public void showGoodbye() {
-        System.out.println(" Bye. Hope to see you again soon!");
+        showMessage("Bye. Hope to see you again soon!");
     }
 
     /** Displays confirmation that a task was added. */
     public void showTaskAdded(Task task, int taskCount) {
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        showMessage("Got it. I've added this task:\n  " + task
+                + "\nNow you have " + taskCount + " tasks in the list.");
     }
 
     /** Displays confirmation that a task was deleted. */
     public void showTaskDeleted(Task task, int taskCount) {
-        System.out.println(" Noted. I've removed this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        showMessage("Noted. I've removed this task:\n  " + task
+                + "\nNow you have " + taskCount + " tasks in the list.");
     }
 
     /** Displays confirmation that a task's completion status changed. */
     public void showStatusUpdated(Task task, boolean isDone) {
-        System.out.println(isDone ? " Nice! I've marked this task as done:"
-                : " OK, I've marked this task as not done yet:");
-        System.out.println("   " + task);
+        showMessage((isDone ? "Nice! I've marked this task as done:"
+                : "OK, I've marked this task as not done yet:") + "\n  " + task);
     }
 
     /** Displays every task in the list. */
     public void showTaskList(TaskList tasks) {
-        System.out.println(" Here are the tasks in your list:");
+        StringBuilder message = new StringBuilder("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(" " + (i + 1) + "." + tasks.get(i));
+            message.append("\n").append(i + 1).append(".").append(tasks.get(i));
         }
+        showMessage(message.toString());
     }
 
     /** Displays tasks whose descriptions contain a supplied keyword. */
     public void showFoundTasks(TaskList tasks, String keyword) {
-        System.out.println(" Here are the matching tasks in your list:");
+        StringBuilder message = new StringBuilder("Here are the matching tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
             if (tasks.get(i).containsKeyword(keyword)) {
-                System.out.println(" " + (i + 1) + "." + tasks.get(i));
+                message.append("\n").append(i + 1).append(".").append(tasks.get(i));
             }
+        }
+        showMessage(message.toString());
+    }
+
+    private void showMessage(String message) {
+        if (messageConsumer == null) {
+            System.out.println(" " + message);
+        } else {
+            messageConsumer.accept(message);
         }
     }
 }

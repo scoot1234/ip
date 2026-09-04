@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 /** Tests keyword matching against task descriptions. */
 public class TaskTest {
+    /** Verifies matching behavior for task-description keywords. */
     @Test
     public void containsKeyword_matchingAndMissingKeywords_returnsExpectedResult() {
         Task task = new Todo("read book");
