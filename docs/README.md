@@ -1,30 +1,36 @@
-# Duke User Guide
+# Bloop User Guide
 
-// Update the title above to match the actual product name
+Bloop manages to-do tasks, deadlines, and events. Each task has a priority: `low`, `med`, or `high`.
+When omitted, priority defaults to `low`.
 
-// Product screenshot goes here
+## Add a to-do
 
-// Product intro goes here
+`todo <description> [/priority <low|med|high>]`
 
-## Adding deadlines
+Examples: `todo read book` and `todo submit reflection /priority high`
 
-// Describe the action and its outcome.
+## Add a deadline
 
-// Give examples of usage
+`deadline <description> /by <yyyy-MM-dd> [/priority <low|med|high>]`
 
-Example: `keyword (optional arguments)`
+Example: `deadline return book /by 2026-09-10 /priority med`
 
-// A description of the expected outcome goes here
+## Add an event
 
+`event <description> /from <yyyy-MM-dd HH:mm> /to <yyyy-MM-dd HH:mm> [/priority <low|med|high>]`
+
+Example: `event team meeting /from 2026-09-10 09:00 /to 2026-09-10 10:00 /priority high`
+
+Priority values are case-insensitive. For deadlines and events, `/priority` must appear after the date fields.
+
+## Find tasks
+
+`find <keyword>` finds tasks whose descriptions contain the keyword and tasks whose priority exactly matches it.
+For example, `find high` finds every high-priority task.
+
+## Priority display
+
+```text
+[T][ ] read book (priority: low)
+[D][ ] return book (by: Sep 10 2026) (priority: high)
 ```
-expected output
-```
-
-## Feature ABC
-
-// Feature details
-
-
-## Feature XYZ
-
-// Feature details

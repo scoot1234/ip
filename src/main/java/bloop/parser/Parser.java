@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import bloop.exception.DukeException;
 import bloop.task.Deadline;
 import bloop.task.Event;
+import bloop.task.Priority;
 import bloop.task.Todo;
 
 /** Parses user commands and validates their arguments. */
@@ -21,11 +22,12 @@ public class Parser {
 
     /** Returns a to-do task parsed from the user input. */
     public static Todo parseTodo(String input) throws DukeException {
-        String description = detailsAfter(input, CommandType.TODO);
+        TaskDetails taskDetails = parseOptionalPriority(detailsAfter(input, CommandType.TODO));
+        String description = taskDetails.details;
         if (description.isEmpty()) {
             throw new DukeException("OOPS!!! The description of a todo cannot be empty.");
         }
-        return new Todo(description);
+        return new Todo(description, taskDetails.priority);
     }
 
     /** Returns a deadline task parsed from the user input. */
@@ -38,6 +40,13 @@ public class Parser {
         if (byIndex == -1) {
             throw new DukeException("OOPS!!! Use deadline <description> /by <date/time>.");
         }
+        int priorityIndex = details.indexOf(" /priority");
+        if (priorityIndex != -1 && priorityIndex < byIndex) {
+            throw new DukeException("OOPS!!! Put /priority after the deadline date.");
+        }
+        TaskDetails taskDetails = parseOptionalPriority(details);
+        details = taskDetails.details;
+        byIndex = details.indexOf(" /by ");
         String description = details.substring(0, byIndex).trim();
         String by = details.substring(byIndex + " /by ".length()).trim();
         if (description.isEmpty()) {
@@ -47,7 +56,7 @@ public class Parser {
             throw new DukeException("OOPS!!! The deadline date/time cannot be empty.");
         }
         try {
-            return new Deadline(description, LocalDate.parse(by));
+            return new Deadline(description, LocalDate.parse(by), taskDetails.priority);
         } catch (DateTimeParseException exception) {
             throw new DukeException("OOPS!!! Use a deadline date in yyyy-MM-dd format.");
         }
@@ -64,6 +73,14 @@ public class Parser {
         if (fromIndex == -1 || toIndex == -1 || toIndex < fromIndex) {
             throw new DukeException("OOPS!!! Use event <description> /from <start> /to <end>.");
         }
+        int priorityIndex = details.indexOf(" /priority");
+        if (priorityIndex != -1 && priorityIndex < toIndex) {
+            throw new DukeException("OOPS!!! Put /priority after the event end date/time.");
+        }
+        TaskDetails taskDetails = parseOptionalPriority(details);
+        details = taskDetails.details;
+        fromIndex = details.indexOf(" /from ");
+        toIndex = details.indexOf(" /to ");
         String description = details.substring(0, fromIndex).trim();
         String from = details.substring(fromIndex + " /from ".length(), toIndex).trim();
         String to = details.substring(toIndex + " /to ".length()).trim();
@@ -75,7 +92,7 @@ public class Parser {
         }
         try {
             return new Event(description, LocalDateTime.parse(from, EVENT_INPUT_FORMAT),
-                    LocalDateTime.parse(to, EVENT_INPUT_FORMAT));
+                    LocalDateTime.parse(to, EVENT_INPUT_FORMAT), taskDetails.priority);
         } catch (DateTimeParseException exception) {
             throw new DukeException("OOPS!!! Use event date/times in yyyy-MM-dd HH:mm format.");
         }
@@ -113,5 +130,36 @@ public class Parser {
         assert input.equals(commandType.getKeyword()) || input.startsWith(commandType.getKeyword() + " ")
                 : "Input must begin with the command keyword";
         return input.substring(commandType.getKeyword().length()).trim();
+    }
+
+    /** Separates an optional trailing priority field from task details. */
+    private static TaskDetails parseOptionalPriority(String details) throws DukeException {
+        int priorityIndex = details.indexOf(" /priority");
+        if (priorityIndex == -1) {
+            return new TaskDetails(details, Priority.LOW);
+        }
+        String priorityText = details.substring(priorityIndex + " /priority".length()).trim();
+        if (priorityText.isEmpty()) {
+            throw new DukeException("OOPS!!! The priority cannot be empty.");
+        }
+        if (priorityText.contains(" /priority")) {
+            throw new DukeException("OOPS!!! Specify priority only once.");
+        }
+        Priority priority = Priority.fromInput(priorityText);
+        if (priority == null) {
+            throw new DukeException("OOPS!!! Priority must be low, med, or high.");
+        }
+        return new TaskDetails(details.substring(0, priorityIndex).trim(), priority);
+    }
+
+    /** Contains parsed task details and their optional priority. */
+    private static class TaskDetails {
+        private final String details;
+        private final Priority priority;
+
+        TaskDetails(String details, Priority priority) {
+            this.details = details;
+            this.priority = priority;
+        }
     }
 }

@@ -21,6 +21,12 @@ public class Deadline extends Task {
         this.by = by;
     }
 
+    /** Creates a deadline with the given description, due date, and priority. */
+    public Deadline(String description, LocalDate by, Priority priority) {
+        super(description, priority);
+        this.by = by;
+    }
+
     /**
      * Returns the deadline's due date.
      *
@@ -39,6 +45,7 @@ public class Deadline extends Task {
     /** Returns a display representation containing the formatted due date. */
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + by.format(DISPLAY_DATE_FORMAT) + ")";
+        return appendPriority("[D][" + getStatusIcon() + "] " + description
+                + " (by: " + by.format(DISPLAY_DATE_FORMAT) + ")");
     }
 }

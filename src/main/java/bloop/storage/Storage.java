@@ -14,6 +14,7 @@ import java.util.List;
 import bloop.exception.DukeException;
 import bloop.task.Deadline;
 import bloop.task.Event;
+import bloop.task.Priority;
 import bloop.task.Task;
 import bloop.task.TaskList;
 import bloop.task.Todo;
@@ -22,6 +23,8 @@ import bloop.task.Todo;
 public class Storage {
     private static final String VERSION_TWO = "V2";
     private static final String VERSION_TWO_PREFIX = VERSION_TWO + " | ";
+    private static final String VERSION_THREE = "V3";
+    private static final String VERSION_THREE_PREFIX = VERSION_THREE + " | ";
     private static final String FIELD_SEPARATOR = " \\| ";
     private static final String TODO_TYPE = "T";
     private static final String DEADLINE_TYPE = "D";
@@ -68,14 +71,17 @@ public class Storage {
         }
     }
 
-    /** Returns a task restored from a legacy or version-two data record. */
+    /** Returns a task restored from a legacy, version-two, or version-three data record. */
     private Task deserializeTask(String taskLine) throws DukeException {
+        if (taskLine.startsWith(VERSION_THREE_PREFIX)) {
+            return deserializeVersionThreeTask(taskLine);
+        }
         if (taskLine.startsWith(VERSION_TWO_PREFIX)) {
             return deserializeVersionTwoTask(taskLine);
         }
         String[] taskParts = taskLine.split(FIELD_SEPARATOR, -1);
         validateTaskParts(taskParts, false);
-        return createTask(taskParts[0], taskParts[1], taskParts[2], taskParts);
+        return createTask(taskParts[0], taskParts[1], taskParts[2], Priority.LOW, taskParts);
     }
 
     /** Returns a task restored from a version-two encoded data record. */
@@ -86,7 +92,19 @@ public class Storage {
         for (int i = 3; i < decodedParts.length; i++) {
             decodedParts[i] = decodeText(decodedParts[i]);
         }
-        return createTask(decodedParts[1], decodedParts[2], decodedParts[3], decodedParts);
+        return createTask(decodedParts[1], decodedParts[2], decodedParts[3], Priority.LOW, decodedParts);
+    }
+
+    /** Returns a task restored from a version-three encoded data record. */
+    private Task deserializeVersionThreeTask(String taskLine) throws DukeException {
+        String[] taskParts = taskLine.split(FIELD_SEPARATOR, -1);
+        validateVersionThreeTaskParts(taskParts);
+        Priority priority = Priority.fromInput(taskParts[3]);
+        String[] decodedParts = taskParts.clone();
+        for (int i = 4; i < decodedParts.length; i++) {
+            decodedParts[i] = decodeText(decodedParts[i]);
+        }
+        return createTask(decodedParts[1], decodedParts[2], decodedParts[4], priority, decodedParts);
     }
 
     /** Validates the type, status, and field count of stored task fields. */
@@ -109,23 +127,35 @@ public class Storage {
         }
     }
 
+    /** Validates the version-three task fields, including priority. */
+    private void validateVersionThreeTaskParts(String[] taskParts) throws DukeException {
+        if (taskParts.length < 5 || Priority.fromInput(taskParts[3]) == null) {
+            throw new DukeException("OOPS!!! Your saved task data is invalid.");
+        }
+        String[] versionTwoParts = new String[taskParts.length - 1];
+        versionTwoParts[0] = VERSION_TWO;
+        versionTwoParts[1] = taskParts[1];
+        versionTwoParts[2] = taskParts[2];
+        System.arraycopy(taskParts, 4, versionTwoParts, 3, taskParts.length - 4);
+        validateTaskParts(versionTwoParts, true);
+    }
+
     /** Returns the task subtype created from validated stored fields. */
-    private Task createTask(String type, String doneStatus, String description, String[] taskParts) {
-
-        int detailStartIndex = taskParts[0].equals(VERSION_TWO) ? 4 : 3;
-
+    private Task createTask(String type, String doneStatus, String description, Priority priority, String[] taskParts) {
+        int detailStartIndex = taskParts[0].equals(VERSION_THREE) ? 5
+                : taskParts[0].equals(VERSION_TWO) ? 4 : 3;
         Task task;
         switch (type) {
             case DEADLINE_TYPE:
-                task = new Deadline(description, LocalDate.parse(taskParts[detailStartIndex]));
+                task = new Deadline(description, LocalDate.parse(taskParts[detailStartIndex]), priority);
                 break;
             case EVENT_TYPE:
                 task = new Event(description, LocalDateTime.parse(taskParts[detailStartIndex]),
-                        LocalDateTime.parse(taskParts[detailStartIndex + 1]));
+                        LocalDateTime.parse(taskParts[detailStartIndex + 1]), priority);
                 break;
             case TODO_TYPE:
             default:
-                task = new Todo(description);
+                task = new Todo(description, priority);
                 break;
         }
         if (doneStatus.equals(DONE)) {
@@ -134,21 +164,23 @@ public class Storage {
         return task;
     }
 
-    /** Returns a version-two data record for a task. */
+    /** Returns a version-three data record for a task. */
     private String serializeTask(Task task) {
+        String priority = task.getPriority().getLabel();
         String doneStatus = task.isDone() ? DONE : NOT_DONE;
         if (task instanceof Deadline) {
             Deadline deadline = (Deadline) task;
-            return VERSION_TWO + " | " + DEADLINE_TYPE + " | " + doneStatus + " | "
+            return VERSION_THREE + " | " + DEADLINE_TYPE + " | " + doneStatus + " | " + priority + " | "
                     + encodeText(task.getDescription()) + " | " + encodeText(deadline.getBy().toString());
         }
         if (task instanceof Event) {
             Event event = (Event) task;
-            return VERSION_TWO + " | " + EVENT_TYPE + " | " + doneStatus + " | "
+            return VERSION_THREE + " | " + EVENT_TYPE + " | " + doneStatus + " | " + priority + " | "
                     + encodeText(task.getDescription()) + " | " + encodeText(event.getFrom().toString())
                     + " | " + encodeText(event.getTo().toString());
         }
-        return VERSION_TWO + " | " + TODO_TYPE + " | " + doneStatus + " | " + encodeText(task.getDescription());
+        return VERSION_THREE + " | " + TODO_TYPE + " | " + doneStatus + " | " + priority + " | "
+                + encodeText(task.getDescription());
     }
 
     /** Returns Base64-encoded text that safely preserves storage separators. */

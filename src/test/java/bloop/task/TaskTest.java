@@ -17,4 +17,15 @@ public class TaskTest {
         assertFalse(task.containsKeyword("Book"));
         assertFalse(task.containsKeyword("return"));
     }
+
+    /** Verifies that a task displays and matches its priority. */
+    @Test
+    public void priority_highPriorityTask_returnsPriorityInDisplayAndSearch() {
+        Task task = new Todo("read book", Priority.HIGH);
+
+        assertTrue(task.containsKeyword("high"));
+        assertTrue(task.containsKeyword("HIGH"));
+        assertFalse(task.containsKeyword("med"));
+        assertTrue(task.toString().contains("(priority: high)"));
+    }
 }
