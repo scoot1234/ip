@@ -20,6 +20,15 @@ import bloop.task.Todo;
 
 /** Loads and saves task data in the application's line-based storage file. */
 public class Storage {
+    private static final String VERSION_TWO = "V2";
+    private static final String VERSION_TWO_PREFIX = VERSION_TWO + " | ";
+    private static final String FIELD_SEPARATOR = " \\| ";
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
+    private static final String NOT_DONE = "0";
+    private static final String DONE = "1";
+
     private final Path dataFile;
 
     /** Creates task storage backed by the supplied data file. */
@@ -61,17 +70,17 @@ public class Storage {
 
     /** Returns a task restored from a legacy or version-two data record. */
     private Task deserializeTask(String taskLine) throws DukeException {
-        if (taskLine.startsWith("V2 | ")) {
+        if (taskLine.startsWith(VERSION_TWO_PREFIX)) {
             return deserializeVersionTwoTask(taskLine);
         }
-        String[] taskParts = taskLine.split(" \\| ", -1);
+        String[] taskParts = taskLine.split(FIELD_SEPARATOR, -1);
         validateTaskParts(taskParts, false);
         return createTask(taskParts[0], taskParts[1], taskParts[2], taskParts);
     }
 
     /** Returns a task restored from a version-two encoded data record. */
     private Task deserializeVersionTwoTask(String taskLine) throws DukeException {
-        String[] taskParts = taskLine.split(" \\| ", -1);
+        String[] taskParts = taskLine.split(FIELD_SEPARATOR, -1);
         validateTaskParts(taskParts, true);
         String[] decodedParts = taskParts.clone();
         for (int i = 3; i < decodedParts.length; i++) {
@@ -88,12 +97,13 @@ public class Storage {
         int expectedDeadlineParts = isVersionTwo ? 5 : 4;
         int expectedEventParts = isVersionTwo ? 6 : 5;
         if (taskParts.length < expectedTodoParts
-                || (!taskParts[statusIndex].equals("0") && !taskParts[statusIndex].equals("1"))) {
+                || (!taskParts[statusIndex].equals(NOT_DONE) && !taskParts[statusIndex].equals(DONE))) {
             throw new DukeException("OOPS!!! Your saved task data is invalid.");
         }
         String type = taskParts[typeIndex];
-        int expectedParts = type.equals("T") ? expectedTodoParts
-                : type.equals("D") ? expectedDeadlineParts : type.equals("E") ? expectedEventParts : -1;
+        int expectedParts = type.equals(TODO_TYPE) ? expectedTodoParts
+                : type.equals(DEADLINE_TYPE) ? expectedDeadlineParts
+                : type.equals(EVENT_TYPE) ? expectedEventParts : -1;
         if (expectedParts != taskParts.length) {
             throw new DukeException("OOPS!!! Your saved task data is invalid.");
         }
@@ -101,26 +111,24 @@ public class Storage {
 
     /** Returns the task subtype created from validated stored fields. */
     private Task createTask(String type, String doneStatus, String description, String[] taskParts) {
-        // validateTaskParts accepts only these values, so reaching this method with another type is a code-path error.
-        assert type.equals("T") || type.equals("D") || type.equals("E") : "Task type must be validated";
-        // validateTaskParts likewise ensures that the persisted completion state is one of these two values.
-        assert doneStatus.equals("0") || doneStatus.equals("1") : "Task status must be validated";
-        int detailStartIndex = taskParts[0].equals("V2") ? 4 : 3;
+
+        int detailStartIndex = taskParts[0].equals(VERSION_TWO) ? 4 : 3;
+
         Task task;
         switch (type) {
-            case "D":
+            case DEADLINE_TYPE:
                 task = new Deadline(description, LocalDate.parse(taskParts[detailStartIndex]));
                 break;
-            case "E":
+            case EVENT_TYPE:
                 task = new Event(description, LocalDateTime.parse(taskParts[detailStartIndex]),
                         LocalDateTime.parse(taskParts[detailStartIndex + 1]));
                 break;
-            case "T":
+            case TODO_TYPE:
             default:
                 task = new Todo(description);
                 break;
         }
-        if (doneStatus.equals("1")) {
+        if (doneStatus.equals(DONE)) {
             task.markAsDone();
         }
         return task;
@@ -128,18 +136,19 @@ public class Storage {
 
     /** Returns a version-two data record for a task. */
     private String serializeTask(Task task) {
-        String doneStatus = task.isDone() ? "1" : "0";
+        String doneStatus = task.isDone() ? DONE : NOT_DONE;
         if (task instanceof Deadline) {
             Deadline deadline = (Deadline) task;
-            return "V2 | D | " + doneStatus + " | " + encodeText(task.getDescription())
-                    + " | " + encodeText(deadline.getBy().toString());
+            return VERSION_TWO + " | " + DEADLINE_TYPE + " | " + doneStatus + " | "
+                    + encodeText(task.getDescription()) + " | " + encodeText(deadline.getBy().toString());
         }
         if (task instanceof Event) {
             Event event = (Event) task;
-            return "V2 | E | " + doneStatus + " | " + encodeText(task.getDescription())
-                    + " | " + encodeText(event.getFrom().toString()) + " | " + encodeText(event.getTo().toString());
+            return VERSION_TWO + " | " + EVENT_TYPE + " | " + doneStatus + " | "
+                    + encodeText(task.getDescription()) + " | " + encodeText(event.getFrom().toString())
+                    + " | " + encodeText(event.getTo().toString());
         }
-        return "V2 | T | " + doneStatus + " | " + encodeText(task.getDescription());
+        return VERSION_TWO + " | " + TODO_TYPE + " | " + doneStatus + " | " + encodeText(task.getDescription());
     }
 
     /** Returns Base64-encoded text that safely preserves storage separators. */
