@@ -1,6 +1,8 @@
 package bloop.ui;
 
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import bloop.exception.DukeException;
 import bloop.task.Task;
@@ -77,22 +79,24 @@ public class Ui {
 
     /** Displays every task in the list. */
     public void showTaskList(TaskList tasks) {
-        StringBuilder message = new StringBuilder("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            message.append("\n").append(i + 1).append(".").append(tasks.get(i));
-        }
-        showMessage(message.toString());
+        String taskLines = IntStream.range(0, tasks.size())
+                .mapToObj(index -> formatTaskLine(index, tasks.get(index)))
+                .collect(Collectors.joining());
+        showMessage("Here are the tasks in your list:" + taskLines);
     }
 
     /** Displays tasks whose descriptions contain a supplied keyword. */
     public void showFoundTasks(TaskList tasks, String keyword) {
-        StringBuilder message = new StringBuilder("Here are the matching tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).containsKeyword(keyword)) {
-                message.append("\n").append(i + 1).append(".").append(tasks.get(i));
-            }
-        }
-        showMessage(message.toString());
+        String taskLines = IntStream.range(0, tasks.size())
+                .filter(index -> tasks.get(index).containsKeyword(keyword))
+                .mapToObj(index -> formatTaskLine(index, tasks.get(index)))
+                .collect(Collectors.joining());
+        showMessage("Here are the matching tasks in your list:" + taskLines);
+    }
+
+    /** Returns one numbered task line for a task's zero-based list index. */
+    private String formatTaskLine(int index, Task task) {
+        return "\n" + (index + 1) + "." + task;
     }
 
     /** Displays one or more lines as a single chatbot message. */
