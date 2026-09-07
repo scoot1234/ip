@@ -158,6 +158,8 @@ public class Duke {
         try {
             storage.save(tasks);
         } catch (DukeException exception) {
+            // The task was appended immediately above, so removing the last entry restores the pre-command list.
+            assert tasks.get(tasks.size() - 1) == task : "The newly added task must be last";
             tasks.removeLast();
             throw exception;
         }
