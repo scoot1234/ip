@@ -101,6 +101,10 @@ public class Storage {
 
     /** Returns the task subtype created from validated stored fields. */
     private Task createTask(String type, String doneStatus, String description, String[] taskParts) {
+        // validateTaskParts accepts only these values, so reaching this method with another type is a code-path error.
+        assert type.equals("T") || type.equals("D") || type.equals("E") : "Task type must be validated";
+        // validateTaskParts likewise ensures that the persisted completion state is one of these two values.
+        assert doneStatus.equals("0") || doneStatus.equals("1") : "Task status must be validated";
         int detailStartIndex = taskParts[0].equals("V2") ? 4 : 3;
         Task task;
         switch (type) {

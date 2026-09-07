@@ -109,6 +109,9 @@ public class Parser {
 
     /** Returns the trimmed text after a command keyword. */
     private static String detailsAfter(String input, CommandType commandType) {
+        // All callers first identify the command type; otherwise removing this keyword could hide a programming error.
+        assert input.equals(commandType.getKeyword()) || input.startsWith(commandType.getKeyword() + " ")
+                : "Input must begin with the command keyword";
         return input.substring(commandType.getKeyword().length()).trim();
     }
 }
