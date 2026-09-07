@@ -111,7 +111,9 @@ public class Storage {
 
     /** Returns the task subtype created from validated stored fields. */
     private Task createTask(String type, String doneStatus, String description, String[] taskParts) {
+
         int detailStartIndex = taskParts[0].equals(VERSION_TWO) ? 4 : 3;
+
         Task task;
         switch (type) {
             case DEADLINE_TYPE:
