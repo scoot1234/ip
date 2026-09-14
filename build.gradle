@@ -49,7 +49,7 @@ test {
 }
 
 application {
-    mainClass = 'bloop.gui.BloopApp'
+    mainClass = 'bloop.gui.BloopLauncher'
 }
 
 jar {
@@ -60,7 +60,7 @@ jar {
 }
 
 shadowJar {
-    archiveFileName = 'duke.jar'
+    archiveFileName = 'orbit.jar'
 }
 
 run {
