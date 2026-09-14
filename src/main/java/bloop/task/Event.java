@@ -25,6 +25,13 @@ public class Event extends Task {
         this.to = to;
     }
 
+    /** Creates an event with the given description, time range, and priority. */
+    public Event(String description, LocalDateTime from, LocalDateTime to, Priority priority) {
+        super(description, priority);
+        this.from = from;
+        this.to = to;
+    }
+
     /**
      * Returns the event's start date or time.
      *
@@ -52,7 +59,8 @@ public class Event extends Task {
     /** Returns a display representation containing the formatted start and end times. */
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + from.format(DISPLAY_DATE_TIME_FORMAT)
-                + " to: " + to.format(DISPLAY_DATE_TIME_FORMAT) + ")";
+        return appendPriority("[E][" + getStatusIcon() + "] " + description
+                + " (from: " + from.format(DISPLAY_DATE_TIME_FORMAT)
+                + " to: " + to.format(DISPLAY_DATE_TIME_FORMAT) + ")");
     }
 }

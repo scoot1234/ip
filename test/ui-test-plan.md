@@ -2,6 +2,51 @@
 
 Use the exact template below for every test case. Keep the expected output as the complete console session, including the greeting and divider lines.
 
+All task displays include a priority suffix. Tasks created without `/priority` show `(priority: low)`.
+
+## Test Case 6: Add, display, find, and validate priorities
+
+Aim: Verify optional priority creation, case-insensitive priority values, default low priority, priority search,
+and rejection of invalid or misplaced priority fields.
+
+### Inputs
+
+```text
+todo read book
+deadline return book /by 2026-01-18 /priority HIGH
+event team meeting /from 2026-01-18 14:00 /to 2026-01-18 16:00 /priority med
+find high
+todo invalid /priority urgent
+deadline misplaced /priority high /by 2026-01-19
+list
+bye
+```
+
+### Expected Output Excerpts
+
+```text
+ Got it. I've added this task:
+   [T][ ] read book (priority: low)
+
+ Got it. I've added this task:
+   [D][ ] return book (by: Jan 18 2026) (priority: high)
+
+ Got it. I've added this task:
+   [E][ ] team meeting (from: Jan 18 2026 14:00 to: Jan 18 2026 16:00) (priority: med)
+
+ Here are the matching tasks in your list:
+ 2.[D][ ] return book (by: Jan 18 2026) (priority: high)
+
+ OOPS!!! Priority must be low, med, or high.
+
+ OOPS!!! Put /priority after the deadline date.
+
+ Here are the tasks in your list:
+ 1.[T][ ] read book (priority: low)
+ 2.[D][ ] return book (by: Jan 18 2026) (priority: high)
+ 3.[E][ ] team meeting (from: Jan 18 2026 14:00 to: Jan 18 2026 16:00) (priority: med)
+```
+
 ## Test Case 1: Add and list each task type
 
 Aim: Verify that todo, deadline, and event commands create the correct task types, save each task-list change, and that `list` shows their statuses and details.

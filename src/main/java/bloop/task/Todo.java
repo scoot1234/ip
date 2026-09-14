@@ -13,9 +13,14 @@ public class Todo extends Task {
         super(description);
     }
 
+    /** Creates a to-do task with the given description and priority. */
+    public Todo(String description, Priority priority) {
+        super(description, priority);
+    }
+
     /** Returns a display representation prefixed with the to-do type icon. */
     @Override
     public String toString() {
-        return "[T]" + super.toString();
+        return appendPriority("[T][" + getStatusIcon() + "] " + description);
     }
 }

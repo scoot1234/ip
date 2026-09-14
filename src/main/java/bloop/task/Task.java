@@ -3,11 +3,12 @@ package bloop.task;
 import java.time.LocalDate;
 
 /**
- * Represents a task and whether it has been completed.
+ * Represents a task with a completion status and priority.
  */
 public class Task {
     protected String description;
     protected boolean isDone;
+    private final Priority priority;
 
     /**
      * Creates an incomplete task with the given description.
@@ -15,8 +16,14 @@ public class Task {
      * @param description description of the task
      */
     public Task(String description) {
+        this(description, Priority.LOW);
+    }
+
+    /** Creates an incomplete task with the given description and priority. */
+    public Task(String description, Priority priority) {
         this.description = description;
         this.isDone = false;
+        this.priority = priority;
     }
 
     /**
@@ -46,6 +53,11 @@ public class Task {
         return isDone;
     }
 
+    /** Returns this task's priority. */
+    public Priority getPriority() {
+        return priority;
+    }
+
     /** Marks this task as complete. */
     public void markAsDone() {
         isDone = true;
@@ -61,13 +73,18 @@ public class Task {
         return false;
     }
 
-    /** Returns whether this task description contains the supplied keyword. */
+    /** Returns whether this task description contains the supplied keyword or its priority matches it. */
     public boolean containsKeyword(String keyword) {
-        return description.contains(keyword);
+        return description.contains(keyword) || priority.getLabel().equalsIgnoreCase(keyword);
     }
 
     @Override
     public String toString() {
-        return "[" + getStatusIcon() + "] " + description;
+        return appendPriority("[" + getStatusIcon() + "] " + description);
+    }
+
+    /** Appends this task's priority to a task display string. */
+    protected String appendPriority(String taskDisplay) {
+        return taskDisplay + " (priority: " + priority.getLabel() + ")";
     }
 }
