@@ -18,15 +18,22 @@ public class Ui {
             + "|____/|_|\\___/ \\___/| .__/ \n"
             + "                    |_|    ";
     private final Consumer<String> messageConsumer;
+    private final Consumer<String> errorConsumer;
 
     /** Creates a console user interface. */
     public Ui() {
-        this(null);
+        this(null, null);
     }
 
     /** Creates a user interface that sends messages to the supplied consumer. */
     public Ui(Consumer<String> messageConsumer) {
+        this(messageConsumer, messageConsumer);
+    }
+
+    /** Creates a user interface with separate handlers for ordinary and error messages. */
+    public Ui(Consumer<String> messageConsumer, Consumer<String> errorConsumer) {
         this.messageConsumer = messageConsumer;
+        this.errorConsumer = errorConsumer;
     }
 
     /** Displays the chatbot greeting. */
@@ -51,7 +58,11 @@ public class Ui {
 
     /** Displays a user-facing exception message. */
     public void showError(DukeException exception) {
-        showMessage(exception.getMessage());
+        if (errorConsumer == null) {
+            showMessage(exception.getMessage());
+        } else {
+            errorConsumer.accept(exception.getMessage());
+        }
     }
 
     /** Displays the farewell message. */
