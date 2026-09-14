@@ -8,7 +8,7 @@ import bloop.exception.DukeException;
 import bloop.task.Task;
 import bloop.task.TaskList;
 
-/** Handles all console output formatting for Bloop. */
+/** Handles all console output formatting for Orbit. */
 public class Ui {
     private static final String DIVIDER = "____________________________________________________________";
     private static final String BANNER = " ____  _                   \n"
@@ -41,11 +41,11 @@ public class Ui {
         if (messageConsumer == null) {
             showDivider();
             System.out.println(BANNER);
-            System.out.println("Hello! I'm Bloop.");
-            System.out.println("What can I do for you?");
+            System.out.println("Orbit online. Your task mission is ready.");
+            System.out.println("What shall we launch?");
             showDivider();
         } else {
-            showMessage("Hello! I'm Bloop.", "What can I do for you?");
+            showMessage("Orbit online. Your task mission is ready.", "What shall we launch?");
         }
     }
 
@@ -67,25 +67,25 @@ public class Ui {
 
     /** Displays the farewell message. */
     public void showGoodbye() {
-        showMessage("Bye. Hope to see you again soon!");
+        showMessage("Orbit signing off. Clear skies ahead!");
     }
 
     /** Displays confirmation that a task was added. */
     public void showTaskAdded(Task task, int taskCount) {
-        showMessage("Got it. I've added this task:", "  " + task,
-                "Now you have " + taskCount + " tasks in the list.");
+        showMessage("Mission logged:", "  " + task,
+                "You now have " + taskCount + " missions on your radar.");
     }
 
     /** Displays confirmation that a task was deleted. */
     public void showTaskDeleted(Task task, int taskCount) {
-        showMessage("Noted. I've removed this task:", "  " + task,
-                "Now you have " + taskCount + " tasks in the list.");
+        showMessage("Mission removed from your radar:", "  " + task,
+                "You now have " + taskCount + " missions on your radar.");
     }
 
     /** Displays confirmation that a task's completion status changed. */
     public void showStatusUpdated(Task task, boolean isDone) {
-        showMessage(isDone ? "Nice! I've marked this task as done:"
-                : "OK, I've marked this task as not done yet:", "  " + task);
+        showMessage(isDone ? "Mission complete:"
+                : "Mission returned to active orbit:", "  " + task);
     }
 
     /** Displays every task in the list. */
@@ -93,7 +93,7 @@ public class Ui {
         String taskLines = IntStream.range(0, tasks.size())
                 .mapToObj(index -> formatTaskLine(index, tasks.get(index)))
                 .collect(Collectors.joining());
-        showMessage("Here are the tasks in your list:" + taskLines);
+        showMessage("Mission control overview:" + taskLines);
     }
 
     /** Displays tasks whose descriptions contain a supplied keyword. */
@@ -102,7 +102,7 @@ public class Ui {
                 .filter(index -> tasks.get(index).containsKeyword(keyword))
                 .mapToObj(index -> formatTaskLine(index, tasks.get(index)))
                 .collect(Collectors.joining());
-        showMessage("Here are the matching tasks in your list:" + taskLines);
+        showMessage("Signals matching \"" + keyword + "\":" + taskLines);
     }
 
     /** Returns one numbered task line for a task's zero-based list index. */
